@@ -2,11 +2,11 @@ import re, sys
 from pathlib import Path
 
 import os
-# Kit de marque officiel : dépôt privé doue-chat/doue-website, dossier brand-kit/ (cloné en lecture).
-BRAND = Path(os.environ.get("BRAND_KIT", "/home/claude/doue-website/brand-kit"))
+# Kit de marque : dépôt privé doue-chat/doue-brand-kit, cloné en lecture (variable BRAND_KIT).
+BRAND = Path(os.environ.get("BRAND_KIT", "/home/claude/doue-brand-kit"))
 LOGO = (BRAND / "kit logo" / "logo" / "doue-logo-blanc.svg").read_text()
 LOGO_INNER = re.search(r"<svg[^>]*>(.*)</svg>", LOGO, re.S).group(1).replace("<title>doue</title>", "")
-# Polices dans ~/.fonts : Doue Bulle (brand-kit/police bulle/Doue-Bulle/OTF, interne à doue, ne pas publier) + Geist.
+# Polices dans ~/.fonts : Doue Bulle (doue-brand-kit/police bulle/Doue-Bulle/OTF, interne à doue, ne pas publier) + Geist.
 
 COAL, BUBBLE, PAPER, ORANGE = "#171A1F", "#22262D", "#F6F3ED", "#FF5A36"
 BUBBLE_D = ("M89 14.5 L221 14.5 Q290.5 14.5 290.5 84 L290.5 199 L264 199 Q250 199 250 213 "

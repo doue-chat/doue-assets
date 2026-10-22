@@ -1,0 +1,14 @@
+*.otf
+*.ttf
+*.woff
+*.woff2
+*.zip
+*.ai
+*.psd
+*.fig
+brand-kit/
+police*/
+sol/
+motifs/
+.env
+*.pem

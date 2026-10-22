@@ -15,7 +15,7 @@ spec.json :
 - "lines" : titre (max 4 lignes, ~14 caractères par ligne à 112 px) ; "sub" : max 4 lignes de ~48 caractères.
 - "big" : grand chiffre ou mot (optionnel). Un chiffre ne figure que s'il est vérifié et sourcé.
 Sorties : <slug>_NN.svg, <slug>_NN.png, <slug>.pdf
-Prérequis : cairosvg, pypdf ; polices installées dans ~/.fonts : Geist (npm i geist) et Doue Bulle (brand-kit/police bulle/Doue-Bulle/OTF/DoueBulle-Bold.otf, puis fc-cache -f). La police est interne à doue : ne jamais la publier dans un dépôt public.
+Prérequis : cairosvg, pypdf ; polices installées dans ~/.fonts : Geist (npm i geist) et Doue Bulle (doue-brand-kit/police bulle/Doue-Bulle/OTF/DoueBulle-Bold.otf, puis fc-cache -f). La police est interne à doue : ne jamais la publier dans un dépôt public.
 """
 import json, re, sys
 from pathlib import Path
@@ -23,8 +23,8 @@ import cairosvg
 from pypdf import PdfWriter, PdfReader
 
 import os
-# Kit de marque officiel : dépôt privé doue-chat/doue-website, dossier brand-kit/ (cloné en lecture).
-BRAND = Path(os.environ.get("BRAND_KIT", "/home/claude/doue-website/brand-kit"))
+# Kit de marque : dépôt privé doue-chat/doue-brand-kit, cloné en lecture (variable BRAND_KIT).
+BRAND = Path(os.environ.get("BRAND_KIT", "/home/claude/doue-brand-kit"))
 LOGO = (BRAND / "kit logo" / "logo" / "doue-logo-blanc.svg").read_text()
 LOGO_INNER = re.search(r"<svg[^>]*>(.*)</svg>", LOGO, re.S).group(1).replace("<title>doue</title>", "")
 TITLE_FONT = "Doue Bulle, Geist, Arial, sans-serif"  # OTF installées depuis brand-kit/police bulle (voir LISEZMOI)
