@@ -15,16 +15,19 @@ spec.json :
 - "lines" : titre (max 4 lignes, ~14 caractères par ligne à 112 px) ; "sub" : max 4 lignes de ~48 caractères.
 - "big" : grand chiffre ou mot (optionnel). Un chiffre ne figure que s'il est vérifié et sourcé.
 Sorties : <slug>_NN.svg, <slug>_NN.png, <slug>.pdf
-Prérequis : cairosvg, pypdf, police Geist installée (npm i geist, copier les TTF dans ~/.fonts).
+Prérequis : cairosvg, pypdf ; polices installées dans ~/.fonts : Geist (npm i geist) et Doue Bulle (brand-kit/police bulle/Doue-Bulle/OTF/DoueBulle-Bold.otf, puis fc-cache -f). La police est interne à doue : ne jamais la publier dans un dépôt public.
 """
 import json, re, sys
 from pathlib import Path
 import cairosvg
 from pypdf import PdfWriter, PdfReader
 
-HERE = Path(__file__).parent
-wm = (HERE / "wordmark-blanc.svg").read_text()
-WM_D = re.search(r' d="([^"]+)"', wm).group(1)
+import os
+# Kit de marque officiel : dépôt privé doue-chat/doue-website, dossier brand-kit/ (cloné en lecture).
+BRAND = Path(os.environ.get("BRAND_KIT", "/home/claude/doue-website/brand-kit"))
+LOGO = (BRAND / "kit logo" / "logo" / "doue-logo-blanc.svg").read_text()
+LOGO_INNER = re.search(r"<svg[^>]*>(.*)</svg>", LOGO, re.S).group(1).replace("<title>doue</title>", "")
+TITLE_FONT = "Doue Bulle, Geist, Arial, sans-serif"  # OTF installées depuis brand-kit/police bulle (voir LISEZMOI)
 COAL, BUBBLE, PAPER, ORANGE = "#171A1F", "#22262D", "#F6F3ED", "#FF5A36"
 BUBBLE_D = ("M89 14.5 L221 14.5 Q290.5 14.5 290.5 84 L290.5 199 L264 199 Q250 199 250 213 "
             "L250 220 Q250 232 238 232 L230 232 Q216 232 216 246 L216 272.5 L92.8 272.5 "
@@ -56,14 +59,14 @@ def slide_svg(i, n, sl):
     y = 400
     parts = []
     if sl.get("big"):
-        parts.append(f'<text x="96" y="{y + 110}" font-size="230" font-weight="600" letter-spacing="-8">{esc(sl["big"])}</text>')
+        parts.append(f'<text x="96" y="{y + 110}" font-size="230" font-weight="700" letter-spacing="-6">{esc(sl["big"])}</text>')
         y += 190
     size = 112 if len(sl.get("lines", [])) <= 3 else 96
     for k, line in enumerate(sl.get("lines", [])):
-        parts.append(f'<text x="96" y="{y + 20 + k * (size + 14)}" font-size="{size}" font-weight="600" letter-spacing="-3">{esc(line)}</text>')
+        parts.append(f'<text x="96" y="{y + 20 + k * (size + 14)}" font-size="{size}" font-weight="700" letter-spacing="-2">{esc(line)}</text>')
     y2 = y + 20 + len(sl.get("lines", [])) * (size + 14) + 30
     for k, line in enumerate(sl.get("sub", [])):
-        parts.append(f'<text x="96" y="{y2 + k * 50}" font-size="36" font-weight="500" fill-opacity="0.78">{esc(line)}</text>')
+        parts.append(f'<text x="96" y="{y2 + k * 50}" font-family="Geist, Arial, sans-serif" font-size="36" font-weight="500" fill-opacity="0.78">{esc(line)}</text>')
     if first:
         thread = TANGLE
         end_x = 1000
@@ -83,8 +86,8 @@ def slide_svg(i, n, sl):
 <g fill="{BUBBLE}">
 {bubbles(i)}
 </g>
-<svg x="96" y="92" width="190" height="58.4" viewBox="357.29 14.5 840.21 258"><path fill-rule="evenodd" fill="{PAPER}" d="{WM_D}"/></svg>
-<g font-family="Geist, Arial, sans-serif" fill="{PAPER}">
+<svg x="96" y="84" width="230" height="58.3" viewBox="19.5 14.5 1178 298">{LOGO_INNER}</svg>
+<g font-family="{TITLE_FONT}" fill="{PAPER}">
 {chr(10).join(parts)}
 </g>
 <path d="{thread}" fill="none" stroke="{ORANGE}" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>

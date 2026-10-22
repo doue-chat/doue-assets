@@ -1,9 +1,12 @@
 import re, sys
 from pathlib import Path
 
-HERE = Path(__file__).parent
-wm = (HERE / "wordmark-blanc.svg").read_text()
-wm_d = re.search(r' d="([^"]+)"', wm).group(1)
+import os
+# Kit de marque officiel : dépôt privé doue-chat/doue-website, dossier brand-kit/ (cloné en lecture).
+BRAND = Path(os.environ.get("BRAND_KIT", "/home/claude/doue-website/brand-kit"))
+LOGO = (BRAND / "kit logo" / "logo" / "doue-logo-blanc.svg").read_text()
+LOGO_INNER = re.search(r"<svg[^>]*>(.*)</svg>", LOGO, re.S).group(1).replace("<title>doue</title>", "")
+# Polices dans ~/.fonts : Doue Bulle (brand-kit/police bulle/Doue-Bulle/OTF, interne à doue, ne pas publier) + Geist.
 
 COAL, BUBBLE, PAPER, ORANGE = "#171A1F", "#22262D", "#F6F3ED", "#FF5A36"
 BUBBLE_D = ("M89 14.5 L221 14.5 Q290.5 14.5 290.5 84 L290.5 199 L264 199 Q250 199 250 213 "
@@ -35,12 +38,12 @@ svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width=
 <g fill="{BUBBLE}">
 {chr(10).join(bub)}
 </g>
-<svg x="96" y="92" width="190" height="58.4" viewBox="357.29 14.5 840.21 258"><path fill-rule="evenodd" fill="{PAPER}" d="{wm_d}"/></svg>
-<g font-family="Geist, Arial, sans-serif" fill="{PAPER}">
-<text x="96" y="468" font-size="132" font-weight="600" letter-spacing="-4">Répondre,</text>
-<text x="96" y="612" font-size="132" font-weight="600" letter-spacing="-4">ce n’est pas</text>
-<text x="96" y="756" font-size="132" font-weight="600" letter-spacing="-4">régler.</text>
-<text x="96" y="852" font-size="32" font-weight="500" fill-opacity="0.72">Une demande n’est pas fermée tant qu’elle n’est pas résolue.</text>
+<svg x="96" y="84" width="230" height="58.3" viewBox="19.5 14.5 1178 298">{LOGO_INNER}</svg>
+<g font-family="Doue Bulle, Geist, Arial, sans-serif" fill="{PAPER}">
+<text x="96" y="468" font-size="132" font-weight="700" letter-spacing="-3">Répondre,</text>
+<text x="96" y="612" font-size="132" font-weight="700" letter-spacing="-3">ce n’est pas</text>
+<text x="96" y="756" font-size="132" font-weight="700" letter-spacing="-3">régler.</text>
+<text x="96" y="852" font-family="Geist, Arial, sans-serif" font-size="32" font-weight="500" fill-opacity="0.72">Une demande n’est pas fermée tant qu’elle n’est pas résolue.</text>
 </g>
 <path d="{thread}" fill="none" stroke="{ORANGE}" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
 <circle cx="1056" cy="980" r="14" fill="{ORANGE}"/>
