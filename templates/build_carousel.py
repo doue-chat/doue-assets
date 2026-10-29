@@ -17,24 +17,18 @@ spec.json :
 Sorties : <slug>_NN.svg, <slug>_NN.png, <slug>.pdf
 Prérequis : cairosvg, pypdf ; polices installées dans ~/.fonts : Geist (npm i geist) et Doue Bulle (doue-brand-kit/police bulle/Doue-Bulle/OTF/DoueBulle-Bold.otf, puis fc-cache -f). La police est interne à doue : ne jamais la publier dans un dépôt public.
 """
-import json, re, sys
+import json, os, re, sys
 from pathlib import Path
-import cairosvg
-from pypdf import PdfWriter, PdfReader
 
-import os
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from pixels import corner_pixels  # noqa: E402
+
 # Kit de marque : dépôt privé doue-chat/doue-brand-kit, cloné en lecture (variable BRAND_KIT).
 BRAND = Path(os.environ.get("BRAND_KIT", "/home/claude/doue-brand-kit"))
 LOGO = (BRAND / "kit logo" / "logo" / "doue-logo-blanc.svg").read_text()
 LOGO_INNER = re.search(r"<svg[^>]*>(.*)</svg>", LOGO, re.S).group(1).replace("<title>doue</title>", "")
 TITLE_FONT = "Doue Bulle, Geist, Arial, sans-serif"  # OTF installées depuis brand-kit/police bulle (voir LISEZMOI)
-COAL, BUBBLE, PAPER, ORANGE = "#171A1F", "#22262D", "#F6F3ED", "#FF5A36"
-BUBBLE_D = ("M89 14.5 L221 14.5 Q290.5 14.5 290.5 84 L290.5 199 L264 199 Q250 199 250 213 "
-            "L250 220 Q250 232 238 232 L230 232 Q216 232 216 246 L216 272.5 L92.8 272.5 "
-            "L42.6 309.6 A14.5 14.5 0 0 1 19.5 298 L19.5 84 Q19.5 14.5 89 14.5 Z")
-BUBBLES = [(900, -40, 0.95, 1), (1010, 300, 0.55, -1), (760, 250, 0.40, 1), (-60, 380, 0.80, -1),
-           (330, 1010, 0.42, 1), (900, 1030, 0.60, -1), (1060, 700, 0.38, 1), (560, -70, 0.50, -1),
-           (-20, 960, 0.50, 1)]
+COAL, PAPER, ORANGE = "#171A1F", "#F6F3ED", "#FF5A36"
 TANGLE = ("M96 980 C96 900 222 900 222 962 C222 1032 128 1032 150 962 "
           "C172 898 292 930 270 992 C256 1034 336 1030 366 980 L1000 980")
 
@@ -43,15 +37,9 @@ def esc(s):
     return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
-def bubbles(shift):
-    out = []
-    for x, y, s, f in BUBBLES:
-        x = x - shift * 14  # léger défilement d'une page à l'autre
-        if f == 1:
-            out.append(f'<path d="{BUBBLE_D}" transform="translate({x:.1f} {y}) scale({s})"/>')
-        else:
-            out.append(f'<path d="{BUBBLE_D}" transform="translate({x + 291 * s:.1f} {y}) scale({-s} {s})"/>')
-    return "\n".join(out)
+def pixels(i):
+    # Grain de pixels de la page d'accueil, coin haut droit ; il glisse d'une case par diapositive.
+    return corner_pixels(reach=620, corner="tr", offset=i)
 
 
 def slide_svg(i, n, sl):
@@ -83,9 +71,7 @@ def slide_svg(i, n, sl):
     footer_right = "doue.ai" if last or first else f"{i + 1} / {n}"
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="1200" height="1200">
 <rect width="1200" height="1200" fill="{COAL}"/>
-<g fill="{BUBBLE}">
-{bubbles(i)}
-</g>
+{pixels(i)}
 <svg x="96" y="84" width="230" height="58.3" viewBox="19.5 14.5 1178 298">{LOGO_INNER}</svg>
 <g font-family="{TITLE_FONT}" fill="{PAPER}">
 {chr(10).join(parts)}
@@ -101,6 +87,9 @@ def slide_svg(i, n, sl):
 
 
 def main(spec_path, out_dir):
+    # Imports du rendu ici : slide_svg reste utilisable sans cairo (aperçus, autres moteurs de rendu).
+    import cairosvg
+    from pypdf import PdfReader, PdfWriter
     spec = json.loads(Path(spec_path).read_text())
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
